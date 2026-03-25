@@ -1,470 +1,222 @@
 import sys
 import os
 import shutil
+import send2trash
 
 print('Welcome to the python-file-manager\n')
 
 drives = [chr(x) + ':' for x in range(65, 90) if os.path.exists(chr(x) + ':')]
 
 def listDirectories():
-    listdir = os.listdir(os.getcwd())
-    for x in listdir:
+    for x in os.listdir(os.getcwd()):
         print(x)
 
+def confirm_action(message):
+    ans = input(message + " (YES/NO): ").lower()
+    return ans in ['yes', 'y']
+
 while True:
-    print("1.Open files/folders \n2.Rename \n3.Move and Paste \n4.Copy and Paste \n5.Delete\n")
+    print("\n1.Open files/folders \n2.Rename \n3.Move and Paste \n4.Copy and Paste \n5.Delete\n")
     result = input("Choose one of the following: ")
 
+    # ================= OPEN =================
     if result == '1':
-        print('\nQuick Acess:\n1. Documents\n2. Videos\n3. Pictures\n4. Downloads\n')
+        print('\nQuick Access:\n1. Documents\n2. Videos\n3. Pictures\n4. Downloads\n')
 
-        print('Drives: ')
-        for x in range(len(drives)):
-            print(str(5 + x) + '. ' + drives[x])
+        print('Drives:')
+        for x in drives:
+            print(x)
 
         while True:
             inp = input("\nEnter your Choice: ")
 
-            if inp == '1':
-                path = 'C:\\Users\\$USERNAME\\Documents'
-                os.chdir(os.path.expandvars(path))
-                break
+            paths = {
+                '1': 'C:\\Users\\%USERNAME%\\Documents',
+                '2': 'C:\\Users\\%USERNAME%\\Videos',
+                '3': 'C:\\Users\\%USERNAME%\\Pictures',
+                '4': 'C:\\Users\\%USERNAME%\\Downloads'
+            }
 
-            elif inp == '2':
-                path = 'C:\\Users\\$USERNAME\\Videos'
-                os.chdir(os.path.expandvars(path))
+            if inp in paths:
+                os.chdir(os.path.expandvars(paths[inp]))
                 break
-
-            elif inp == '3':
-                path = 'C:\\Users\\$USERNAME\\Pictures'
-                os.chdir(os.path.expandvars(path))
-                break
-
-            elif inp == '4':
-                path = 'C:\\Users\\$USERNAME\\Downloads'
-                os.chdir(os.path.expandvars(path))
-                break
-
             elif inp in drives:
                 os.chdir(inp + '\\')
                 break
-
             else:
-                print('Error\nEnter a correct input / drive name.\n')
+                print('Invalid input.')
 
         while True:
-
             listDirectories()
+            print('\nType "exitManager" to exit.')
+            print('Type "backManager" to go back.')
 
-            print('\n\nType "exitManager" to exit from file manager.')
-            print('Type "backManager" to go up one directory.')
             res = input('\nChoose a file/folder: ')
-            print('\n')
 
-            if res in os.listdir(os.getcwd()):
+            if res in os.listdir():
                 if os.path.isfile(res):
-                    os.system('"' + res + '"')
+                    os.system(f'"{res}"')
                 else:
                     os.chdir(res)
-
             elif res == 'exitManager':
                 sys.exit(0)
-
             elif res == 'backManager':
                 os.chdir('..')
-
             else:
-                print('No file/folder exist of this name.')
+                print('Not found.')
 
-    if result == '2':
-        print("You chose to rename")
-        print('Drives: ')
-        for x in range(len(drives)):
-            print(str(1 + x) + '. ' + drives[x])
+    # ================= RENAME =================
+    elif result == '2':
+        print('Drives:')
+        for x in drives:
+            print(x)
 
         while True:
-            inp = input("\nEnter your Choice: ")
-
+            inp = input("\nEnter drive: ")
             if inp in drives:
                 os.chdir(inp + '\\')
                 break
             else:
-                print('Error\nEnter a correct drive name.\n')
+                print('Invalid.')
 
         while True:
-
             listDirectories()
+            print('\nType "renameManager" to rename current folder')
 
-            print('\n\nType "exitManager" to exit from file manager.')
-            print('Type "backManager" to go up one directory.')
-            print('Type "renameManager" to rename this directory')
+            res = input('\nChoose file/folder: ')
 
-            res = input('\nChoose a file to rename: ')
-            print('\n')
-
-            if res in os.listdir(os.getcwd()):
-                if os.path.isfile(res):
-
-                    new_name = input("Enter a new name: ")
-                    ogDir = res
-                    newDir = os.getcwd() + '\\' + new_name
-                    shutil.move(ogDir, newDir)
-                else:
-                    os.chdir(res)
-
-            elif res == 'exitManager':
-                sys.exit(0)
-
-            elif res == 'backManager':
-                os.chdir('..')
+            if res in os.listdir():
+                new_name = input("New name: ")
+                shutil.move(res, new_name)
 
             elif res == 'renameManager':
-
-                new_name = input("Enter a new name: ")
-                ogDir = os.getcwd()
+                new_name = input("New name: ")
+                current = os.getcwd()
                 os.chdir('..')
-                newDir = os.getcwd() + '\\' + new_name
-                shutil.move(ogDir, newDir)
+                shutil.move(current, new_name)
 
-            else:
-                print('No file/folder exist of this name.')
-
-    if result == '3':
-        print("You chose to move")
-        print('Drives: ')
-        for x in range(len(drives)):
-            print(str(1 + x) + '. ' + drives[x])
-
-        while True:
-            inp = input("\nEnter your Choice: ")
-
-            if inp in drives:
-                os.chdir(inp + '\\')
-                break
-            else:
-                print('Error\nEnter a correct drive name.\n')
-
-        while True:
-
-            listDirectories()
-
-            print('\n\nType "exitManager" to exit from file manager.')
-            print('Type "backManager" to go up one directory.')
-            print('Type "cutManager" to move this directory')
-
-            res = input('\nChoose a file to move: ')
-            print('\n')
-
-            if res in os.listdir(os.getcwd()):
-
-                if os.path.isfile(res):
-                    og_path = os.getcwd() + "\\" + res
-                    print("\nMove " + res + " to a desired location.")
-
-                    while True:
-                        for x in range(len(drives)):
-                            print(str(1 + x) + '. ' + drives[x])
-
-                        inp2 = input("\nEnter your Choice: ")
-
-                        if inp2 in drives:
-                            os.chdir(inp2 + '\\')
-                            break
-                        else:
-                            print('Error\nEnter a correct drive name.\n')
-
-                    while True:
-                        listDirectories()
-
-                        print('Type "pasteManager" to paste this file in current directory')
-
-                        res2 = input('\nChoose a file to move: ')
-                        print('\n')
-
-                        if res2 in os.listdir(os.getcwd()):
-                            if os.path.isfile(res):
-                                print("You can't choose a file.\nPlease choose a folder.")
-                            else:
-                                os.chdir(res2)
-
-                        elif res2 == 'pasteManage1r':
-                            shutil.move(og_path, os.getcwd())
-                            break
-
-                else:
-                    os.chdir(res)
-
+            elif res == 'backManager':
+                os.chdir('..')
 
             elif res == 'exitManager':
                 sys.exit(0)
 
-            elif res == 'backManager': 
-                os.chdir('..')
-
-            elif res == 'cutManager':
-                og_path = os.getcwd()
-
-                print("Moving the current directory")
-                while True:
-                    for x in range(len(drives)):
-                        print(str(1 + x) + '. ' + drives[x])
-
-                    inp2 = input("\nEnter your Choice: ")
-
-                    if inp2 in drives:
-                        os.chdir(inp2 + '\\')
-                        break
-                    else:
-                        print('Error\nEnter a correct drive name.\n')
-
-                while True:
-                    listDirectories()
-
-                    print('\nType "pasteManager" to paste this folder in current directory')
-
-                    res2 = input('\nChoose a folder to open: ')
-                    print('\n')
-
-                    if res2 in os.listdir(os.getcwd()):
-                        if os.path.isfile(res):
-                            print("You can't choose a file.\nPlease choose a folder.")
-                        else:
-                            os.chdir(res2)
-
-                    elif res2 == 'pasteManager':
-                        shutil.move(og_path, os.getcwd())
-                        break
-
-            else:
-                print('No file/folder exist of this name.')
-
-    if result == '4':
-        print("You chose to copy")
-        print('Drives: ')
-        for x in range(len(drives)):
-            print(str(1 + x) + '. ' + drives[x])
+    # ================= MOVE =================
+    elif result == '3':
+        print("Move files")
 
         while True:
-            inp = input("\nEnter your Choice: ")
+            for x in drives:
+                print(x)
 
+            inp = input("\nEnter drive: ")
             if inp in drives:
                 os.chdir(inp + '\\')
                 break
-            else:
-                print('Error\nEnter a correct drive name.\n')
 
         while True:
-
             listDirectories()
+            res = input('\nSelect file to move: ')
 
-            print('\n\nType "exitManager" to exit from file manager.')
-            print('Type "backManager" to go up one directory.')
-            print('Type "copyManager" to copy this directory')
+            if res in os.listdir() and os.path.isfile(res):
+                source = os.path.join(os.getcwd(), res)
 
-            res = input('\nChoose a file to copy: ')
-            print('\n')
+                print("Choose destination drive:")
+                for x in drives:
+                    print(x)
 
-            if res in os.listdir(os.getcwd()):
+                dest_drive = input("Drive: ")
+                if dest_drive in drives:
+                    os.chdir(dest_drive + '\\')
 
-                if os.path.isfile(res):
-                    og_path = os.getcwd() + "\\" + res
-                    print("Move " + res + " to a desired location.")
+                    listDirectories()
+                    folder = input("Select destination folder: ")
 
-                    while True:
-                        for x in range(len(drives)):
-                            print(str(1 + x) + '. ' + drives[x])
+                    if folder in os.listdir() and os.path.isdir(folder):
+                        shutil.move(source, os.path.join(os.getcwd(), folder))
+                        print("Moved successfully")
 
-                        inp2 = input("\nEnter your Choice: ")
-
-                        if inp2 in drives:
-                            os.chdir(inp2 + '\\')
-                            break
-                        else:
-                            print('Error\nEnter a correct drive name.\n')
-
-                    while True:
-                        listDirectories()
-
-                        print('Type "pasteManager" to copy this file in current directory')
-
-                        res2 = input('\nChoose a file to move: ')
-                        print('\n')
-
-                        if res2 in os.listdir(os.getcwd()):
-                            if os.path.isfile(res):
-                                print("You can't choose a file.\nPlease choose a folder.")
-                            else:
-                                os.chdir(res2)
-
-                        elif res2 == 'pasteManager':
-                            shutil.copy(og_path, os.getcwd())
-                            break
-
-                else:
-                    os.chdir(res)
-
+            elif res == 'backManager':
+                os.chdir('..')
 
             elif res == 'exitManager':
                 sys.exit(0)
 
-            elif res == 'backManager': 
+    # ================= COPY =================
+    elif result == '4':
+        print("Copy files")
+
+        while True:
+            for x in drives:
+                print(x)
+
+            inp = input("\nEnter drive: ")
+            if inp in drives:
+                os.chdir(inp + '\\')
+                break
+
+        while True:
+            listDirectories()
+            res = input('\nSelect file to copy: ')
+
+            if res in os.listdir() and os.path.isfile(res):
+                source = os.path.join(os.getcwd(), res)
+
+                print("Choose destination drive:")
+                for x in drives:
+                    print(x)
+
+                dest_drive = input("Drive: ")
+                if dest_drive in drives:
+                    os.chdir(dest_drive + '\\')
+
+                    listDirectories()
+                    folder = input("Select destination folder: ")
+
+                    if folder in os.listdir() and os.path.isdir(folder):
+                        shutil.copy(source, os.path.join(os.getcwd(), folder))
+                        print("Copied successfully")
+
+            elif res == 'backManager':
                 os.chdir('..')
 
-            elif res == 'copyManager':
-                og_path = os.getcwd()
+            elif res == 'exitManager':
+                sys.exit(0)
 
-                print("Copying the current directory")
-                while True:
-                    for x in range(len(drives)):
-                        print(str(1 + x) + '. ' + drives[x])
+    # ================= DELETE =================
+    elif result == '5':
+        print("\n1. Permanent\n2. Recycle Bin")
+        choice = input("Choose delete type: ")
 
-                    inp2 = input("\nEnter your Choice: ")
-
-                    if inp2 in drives:
-                        os.chdir(inp2 + '\\')
-                        break
-                    else:
-                        print('Error\nEnter a correct drive name.\n')
-
-                while True:
-                    listDirectories()
-
-                    print('\nType "pasteManager" to copy this file in current directory')
-
-                    res2 = input('\nChoose a folder to open: ')
-                    print('\n')
-
-                    if res2 in os.listdir(os.getcwd()):
-                        if os.path.isfile(res):
-                            print("You can't choose a file.\nPlease choose a folder.")
-                        else:
-                            os.chdir(res2)
-
-                    elif res2 == 'pasteManager':
-                        print(og_path)
-                        folder_name = og_path.split('\\')[-1]
-                        folder_directory = os.getcwd() + '\\' + folder_name
-                        shutil.copytree(og_path, folder_directory)
-                        break
-
-            else:
-                print('No file/folder exist of this name.')
-
-    if result == '5':
         while True:
+            for x in drives:
+                print(x)
 
-            print('\n1. Permanently \n2. Recycle Bin')
-            query = input('Would you like to permanently delete or send to Recycle Bin?: ')
+            inp = input("Select drive: ")
+            if inp in drives:
+                os.chdir(inp + '\\')
+                break
 
-            if query == '1':
-                print('You chose to permanently delete files/folders.\n')
-                print('Drives: ')
-                for x in range(len(drives)):
-                    print(str(1 + x) + '. ' + drives[x])
+        while True:
+            listDirectories()
+            res = input("\nSelect file/folder: ")
 
-                while True:
-                    inp = input("\nEnter your Choice: ")
+            if res in os.listdir():
+                if confirm_action("Are you sure you want to delete?"):
 
-                    if inp in drives:
-                        os.chdir(inp + '\\')
-                        break
-                    else:
-                        print('Error\nEnter a correct drive name.\n')
-
-                while True:
-
-                    listDirectories()
-
-                    print('\n\nType "exitManager" to exit from file manager.')
-                    print('Type "backManager" to go up one directory.')
-                    print('Type "deleteManager" to permanently delete this directory')
-
-                    res = input('\nChoose a file to delete: ')
-                    print('\n')
-
-                    if res in os.listdir(os.getcwd()):
+                    if choice == '1':
                         if os.path.isfile(res):
-
-                            print('Are you sure you want to permanently delete this file? (YES/NO)')
-                            ans = input('Yes or No: ')
-                            if ans.lower() == 'yes' or 'y':
-                                os.unlink(res)
+                            os.remove(res)
                         else:
-                            os.chdir(res)
+                            shutil.rmtree(res)
 
-                    elif res == 'exitManager': 
-                        sys.exit(0)
+                    elif choice == '2':
+                        send2trash.send2trash(res)
 
-                    elif res == 'backManager': 
-                        os.chdir('..')
+                    print("Deleted successfully")
 
-                    elif res == 'deleteManager': 
+            elif res == 'backManager':
+                os.chdir('..')
 
-                        print('Are you sure you want to permanently delete this folder? (YES/NO)')
-                        ans = input('Yes or No: ')
-
-                        if ans.lower() == 'yes' or 'y':
-                            path = os.getcwd()
-                            os.chdir('..')
-                            shutil.rmtree(path)
-
-                    else:
-                        print('No file/folder exist of this name.')
-
-            elif query == '2':
-                print('You chose to temporarily delete files/folders.')
-                print('Drives: ')
-                for x in range(len(drives)):
-                    print(str(1 + x) + '. ' + drives[x])
-
-                while True:
-                    inp = input("\nEnter your Choice: ")
-
-                    if inp in drives:
-                        os.chdir(inp + '\\')
-                        break
-                    else:
-                        print('Error\nEnter a correct drive name.\n')
-
-                while True:
-
-                    listDirectories()
-
-                    print('\n\nType "exitManager" to exit from file manager.')
-                    print('Type "backManager" to go up one directory.')
-                    print('Type "deleteManager" to send this directory to recycle bin')
-
-                    res = input('\nChoose a file to delete: ')
-                    print('\n')
-
-                    if res in os.listdir(os.getcwd()):
-                        if os.path.isfile(res):
-
-                            print('Are you sure you want to send this folder to recycle bin? (YES/NO)')
-                            ans = input('Yes or No: ')
-                            if ans.lower() == 'yes' or 'y':
-                                send2trash.send2trash(res)
-                        else:
-                            os.chdir(res)
-
-                    elif res == 'exitManager':
-                        sys.exit(0)
-
-                    elif res == 'backManager':
-                        os.chdir('..')
-
-                    elif res == 'deleteManager':
-
-                        print('Are you sure you want to send this folder to recycle bin? (YES/NO)')
-                        ans = input('Yes or No: ')
-
-                        if ans.lower() == 'yes' or 'y':
-                            path = os.getcwd()
-                            os.chdir('..')
-                            send2trash.send2trash(path)
-
-                    else:
-                        print('No file/folder exist of this name.')
-
-        else:
-            print('You chose wrong number')
+            elif res == 'exitManager':
+                sys.exit(0)
